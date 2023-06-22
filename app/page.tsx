@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image'
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import Footer from './footer'
@@ -9,22 +8,26 @@ export default function Home() {
   const router = useRouter();
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [fuelType, setFuelType] = useState('');
+  const [fuelType, setFuelType] = useState('10');
 
   const moveToCarsListPage = () => {
     if (startDate && endDate && checkIsDateValid(startDate, endDate)) {
-      console.log(startDate, endDate, fuelType);
-      router.push('/carsList');
+      console.log(`[MainPage]: ${startDate} | ${endDate} | ${fuelType}`);
+      router.push(`/carsList?startDate=${startDate}&endDate=${endDate}&fuelType=${fuelType}`);
     } else {
       alert('Wypełnij poprawnie wszystkie pola! Data początkowa nie może być późniejsza niż data końcowa!');
     }
   }
 
+  const moveToAdminLoginPage = () => {
+    router.push('/login');
+  }
+
   const checkIsDateValid = (startDate: string, endDate: string) => {
     const start = new Date(startDate);
     const end = new Date(endDate);
-
-    if (start > end) {
+    const today = new Date();
+    if (start > end || start < today || end < today) {
       return false;
     }
 
@@ -36,7 +39,7 @@ export default function Home() {
       <div className="w-full bg-black bg-opacity-40 absolute inset-0">
         <div className="flex flex-col h-screen justify-between">
           <div className='flex justify-end'>
-            <button className="bg-red-400 hover:bg-red-600 text-white font-bold py-2 px-4 border border-red-200 rounded">
+            <button onClick={moveToAdminLoginPage} className="bg-red-400 hover:bg-red-600 text-white font-bold py-2 px-4 border border-red-200 rounded">
               Logowanie administratora
             </button>
           </div>

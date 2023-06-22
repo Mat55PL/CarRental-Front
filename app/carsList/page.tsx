@@ -1,10 +1,15 @@
 'use client';
 import Footer from '../footer'
 import { useEffect, useState } from "react";
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+
 
 const carsListPage = () => {
-    const router = useRouter(); // przekierowanie do strony głównej
+    const router = useRouter();
+
+    const [searchParams] = useSearchParams();
+    const params = new URLSearchParams(searchParams[0]);
+
     type Car = {
         id: number;
         brand: string;
@@ -29,17 +34,26 @@ const carsListPage = () => {
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        getAvailableCars();
+        const startDate = params.get('startDate');
+        const endDate = params.get('endDate');
+        const fuelType = params.get('fuelType');
+
+        console.log(`[startDate]: ${startDate} | [endDate]: ${endDate} | [fuelType]: ${fuelType}`);
+
+        if (startDate !== null && endDate !== null && fuelType !== null)
+            getAvailableCars(startDate, endDate, Number(fuelType));
+        else
+            setError(`Przepraszamy! Wystąpił błąd podczas pobierania danych [UseEffect Error]: ${startDate} | ${endDate} | ${fuelType}`);
     }, []);
 
-    const getAvailableCars = async () => {
+    const getAvailableCars = async (start: string, end: string, fuel: number) => {
         try {
-            const response = await fetch('http://localhost:5192/api/Car/GetAvailableCars');
+            const response = await fetch(`http://localhost:5192/api/Car/GetAvailableCarsByDateRange?startDate=${start}&endDate=${end}`);
             const data = await response.json();
             setCars(data);
         } catch (error) {
-            setError('Wystąpił błąd podczas pobierania danych');
-            console.log(error);
+            setError('Przepraszamy! Wystąpił błąd podczas pobierania danych [' + error + ']');
+            console.log(`[getAvailableCars:ERROR]: ${error}`);
         }
     }
 
@@ -60,7 +74,6 @@ const carsListPage = () => {
 
     function GetCarImage(brand: string, model: string, callback: (imgUrl: string) => void) {
         const imgUrl = `./cars-img/${brand}.${model}.img.png`;
-
 
         const img = new Image();
 
@@ -118,7 +131,7 @@ const carsListPage = () => {
                 <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mg-2' onClick={moveToHomePage}>Wróć do strony głównej!</button>
                 <h1 className='text-4xl text-center font-bold mt-8 mb-8'>Dostępne samochody</h1>
                 {error ? (
-                    <div className="bg-red-500 text-white p-4 rounded">{error}</div>
+                    <div className="bg-red-500 text-center text-white p-4 rounded">{error}</div>
                 ) : (
                     <div className="flex flex-wrap justify-center">
                         {cars.map((car, index) => (
