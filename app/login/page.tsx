@@ -1,15 +1,17 @@
 'use client';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
 function login() {
+    const router = useRouter();
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
+
     const handleLogin = async (event: { preventDefault: () => void; }) => {
         event.preventDefault();
         setError(null);
-        // Przetwarzanie logowania - tutaj możesz dodać wywołanie API
-        console.log("Logowanie użytkownika", username, password);
         const response = await fetch(`http://localhost:5192/api/User/GetUserByUserNameAndPasswordAsync?userName=${username}&password=${password}`);
         console.log(`Response status: ${response.status}`)
         if (response.status === 204) {
@@ -17,12 +19,16 @@ function login() {
             return;
         };
         const data = await response.json();
-        console.log(data);
+        router.push(`/admin?name=${data.userName}&rank=${data.rank}`);
+    };
+
+    const moveToHomePage = () => {
+        router.push(`/`);
     }
 
     return (
         <div className="flex items-center justify-center h-screen bg-zinc-800">
-
+            <button className='bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mg-2' onClick={moveToHomePage}>Wróć do strony głównej!</button>
             <form className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4" onSubmit={handleLogin}>
                 {error ? (
                     <div className="bg-red-500 text-center text-white p-4 rounded">{error}</div>

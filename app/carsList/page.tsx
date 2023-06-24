@@ -1,14 +1,14 @@
 'use client';
 import Footer from '../footer'
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 
 
 const carsListPage = () => {
     const router = useRouter();
+    const params = useSearchParams();
+    const query = router;
 
-    const [searchParams] = useSearchParams();
-    const params = new URLSearchParams(searchParams[0]);
 
     type Car = {
         id: number;
@@ -32,23 +32,36 @@ const carsListPage = () => {
 
     const [cars, setCars] = useState<Car[]>([]);
     const [error, setError] = useState<string | null>(null);
-
     useEffect(() => {
+
         const startDate = params.get('startDate');
         const endDate = params.get('endDate');
         const fuelType = params.get('fuelType');
 
         console.log(`[startDate]: ${startDate} | [endDate]: ${endDate} | [fuelType]: ${fuelType}`);
 
-        if (startDate !== null && endDate !== null && fuelType !== null)
-            getAvailableCars(startDate, endDate, Number(fuelType));
+        if (startDate !== null && endDate !== null && fuelType == "10")
+            getAvailableCars(startDate, endDate);
+        else if (startDate !== null && endDate !== null && fuelType !== null)
+            getAvailableCarsByFuel(startDate, endDate, Number(fuelType));
         else
             setError(`Przepraszamy! Wystąpił błąd podczas pobierania danych [UseEffect Error]: ${startDate} | ${endDate} | ${fuelType}`);
     }, []);
 
-    const getAvailableCars = async (start: string, end: string, fuel: number) => {
+    const getAvailableCars = async (start: string, end: string) => {
         try {
             const response = await fetch(`http://localhost:5192/api/Car/GetAvailableCarsByDateRange?startDate=${start}&endDate=${end}`);
+            const data = await response.json();
+            setCars(data);
+        } catch (error) {
+            setError('Przepraszamy! Wystąpił błąd podczas pobierania danych [' + error + ']');
+            console.log(`[getAvailableCarsByFuel:ERROR]: ${error}`);
+        }
+    }
+
+    const getAvailableCarsByFuel = async (start: string, end: string, fuel: number) => {
+        try {
+            const response = await fetch(`http://localhost:5192/api/Car/GetAvailableCarsByFuelTypeAndDateRange?fuelType=${fuel}&startDate=${start}&endDate=${end}`);
             const data = await response.json();
             setCars(data);
         } catch (error) {
