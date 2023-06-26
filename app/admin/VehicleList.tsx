@@ -16,6 +16,7 @@ interface Vehicle {
 function VehicleList() {
     const [vehicles, setVehicles] = useState<Vehicle[]>([]);
     const [showAddVehicleForm, setShowAddVehicleForm] = useState<boolean>(false);
+    const [vehicleToEdit, setVehicleToEdit] = useState<Vehicle | null>(null);
     const [brand, setBrand] = useState<string>('');
     const [model, setModel] = useState<string>('');
     const [year, setYear] = useState<number>(2020);
@@ -53,7 +54,11 @@ function VehicleList() {
     }
 
     const handleEdit = (vehicleId: number) => {
-        // Obsłuż akcję edycji dla pojazdu o określonym ID
+        const vehicle = vehicles.find((v) => v.id === vehicleId);
+        if (vehicle) {
+            setVehicleToEdit(vehicle);
+            setShowAddVehicleForm(true);
+        }
     };
 
     const handleDelete = (vehicleId: number) => {
@@ -75,33 +80,70 @@ function VehicleList() {
     const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault(); // Zapobieganie przeładowaniu strony po wysłaniu formularza
 
-        const newVehicle = {
-            id: vehicles.length + 1, // dla uproszczenia, ale najlepiej użyć unikalnego generatora ID
-            brand,
-            model,
-            year,
-            color,
-            pricePerDay,
-            fuelType,
-            isAvailable,
-        };
-        console.log('Nowy pojazd:', newVehicle);
-        // Dodawanie pojazdu za pomocą api
-        fetch('http://localhost:5192/api/Car/AddCar', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(newVehicle)
-        }).then(() => {
-            console.log('Pojazd został dodany');
-        }).catch((error) => {
-            console.log('Wystąpił błąd podczas dodawania pojazdu:', error);
-        }).finally(() => {
-            setVehicles(prevVehicles => [...prevVehicles, newVehicle]); // Dodawanie nowego pojazdu do listy
-        });
+        if (vehicleToEdit) {
+            console.log('Edycja pojazdu:', vehicleToEdit);
+            // Edycja pojazdu za pomocą api
+            fetch('http://localhost:5192/api/Car/UpdateCar', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: vehicleToEdit.id,
+                    brand,
+                    model,
+                    year,
+                    color,
+                    pricePerDay,
+                    fuelType,
+                    isAvailable,
+                })
+            }).then(() => {
+                console.log('Pojazd został zaktualizowany');
+            }).catch((error) => {
+                console.log('Wystąpił błąd podczas aktualizowania pojazdu:', error);
+            }).finally(() => {
+                setVehicles(prevVehicles => prevVehicles.map(vehicle => vehicle.id === vehicleToEdit.id ? {
+                    id: vehicleToEdit.id,
+                    brand,
+                    model,
+                    year,
+                    color,
+                    pricePerDay,
+                    fuelType,
+                    isAvailable,
+                } : vehicle));
+            });
+        } else {
+            const newVehicle = {
+                id: vehicles.length + 1, // dla uproszczenia, ale najlepiej użyć unikalnego generatora ID
+                brand,
+                model,
+                year,
+                color,
+                pricePerDay,
+                fuelType,
+                isAvailable,
+            };
+            console.log('Nowy pojazd:', newVehicle);
+            // Dodawanie pojazdu za pomocą api
+            fetch('http://localhost:5192/api/Car/AddCar', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newVehicle)
+            }).then(() => {
+                console.log('Pojazd został dodany');
+            }).catch((error) => {
+                console.log('Wystąpił błąd podczas dodawania pojazdu:', error);
+            }).finally(() => {
+                setVehicles(prevVehicles => [...prevVehicles, newVehicle]); // Dodawanie nowego pojazdu do listy
+            });
+        }
 
         setShowAddVehicleForm(false); // Zamknięcie formularza po dodaniu pojazdu
+        setVehicleToEdit(null); // Resetowanie pojazdu do edycji
         resetForm(); // Resetowanie formularza
     }
 
@@ -114,6 +156,20 @@ function VehicleList() {
         setFuelType(0);
         setIsAvailable(false);
     }
+
+    useEffect(() => {
+        if (vehicleToEdit) {
+            setBrand(vehicleToEdit.brand);
+            setModel(vehicleToEdit.model);
+            setYear(vehicleToEdit.year);
+            setColor(vehicleToEdit.color);
+            setPricePerDay(vehicleToEdit.pricePerDay);
+            setFuelType(vehicleToEdit.fuelType);
+            setIsAvailable(vehicleToEdit.isAvailable);
+        } else {
+            resetForm();
+        }
+    }, [vehicleToEdit]);
 
     return (
         <div className="flex flex-wrap justify-center">
@@ -149,7 +205,7 @@ function VehicleList() {
                         <label>
                             Typ paliwa:
                             <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                type="text" value={fuelType} onChange={e => setFuelType(Number(e.target.value))} />
+                                type="number" min={0} max={3} value={fuelType} onChange={e => setFuelType(Number(e.target.value))} />
                         </label>
                         <label>
                             Dostępny:
@@ -157,12 +213,13 @@ function VehicleList() {
                         </label>
                         <div className="flex justify-end mt-2">
                             <button className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mr-2"
-                                onClick={() => setShowAddVehicleForm(prevState => !prevState)}> Anuluj </button>
+                                onClick={() => { setShowAddVehicleForm(prevState => !prevState); setVehicleToEdit(null); }}> Anuluj </button>
                             <button type="submit" className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                Dodaj pojazd
+                                {vehicleToEdit ? 'Zapisz zmiany' : 'Dodaj pojazd'}
                             </button>
                         </div>
                     </form>
+
                 </div>
             )}
             {vehicles.map((vehicle) => (
