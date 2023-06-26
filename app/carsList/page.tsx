@@ -22,6 +22,7 @@ const carsListPage = () => {
     }
 
     interface car {
+        id: number;
         brand: string;
         model: string;
         year: number;
@@ -32,6 +33,8 @@ const carsListPage = () => {
 
     const [cars, setCars] = useState<Car[]>([]);
     const [error, setError] = useState<string | null>(null);
+    const [startDateRent, setStartDateRent] = useState<string | null>(null);
+    const [endDateRent, setEndDateRent] = useState<string | null>(null);
     useEffect(() => {
 
         const startDate = params.get('startDate');
@@ -39,7 +42,8 @@ const carsListPage = () => {
         const fuelType = params.get('fuelType');
 
         console.log(`[startDate]: ${startDate} | [endDate]: ${endDate} | [fuelType]: ${fuelType}`);
-
+        setStartDateRent(startDate);
+        setEndDateRent(endDate);
         if (startDate !== null && endDate !== null && fuelType == "10")
             getAvailableCars(startDate, endDate);
         else if (startDate !== null && endDate !== null && fuelType !== null)
@@ -105,6 +109,11 @@ const carsListPage = () => {
         router.push('/');
     }
 
+    const handleRent = async (carIdRent: Number) => {
+        console.log(`[handleRent]: ${carIdRent} | ${startDateRent} | ${endDateRent}`);
+        router.push(`/rentCar?carId=${carIdRent}&startDate=${startDateRent}&endDate=${endDateRent}`);
+    };
+
     function CarItem({ car }: { car: car }) {
         const [carImageUrl, setCarImageUrl] = useState<string | null>(null);
 
@@ -131,10 +140,9 @@ const carsListPage = () => {
                     <p className="text-sm text-gray-700">
                         Rodzaj paliwa: <span className="font-bold">{getFuelType(car.fuelType)}</span>
                     </p>
-                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mg-2">Wypożycz</button>
+                    <button onClick={() => handleRent(car.id)} className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mg-2">Wypożycz</button>
                 </div>
             </div>
-
         );
     }
 
