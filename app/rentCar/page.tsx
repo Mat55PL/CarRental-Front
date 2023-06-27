@@ -84,25 +84,26 @@ const rentCar = () => {
                     <form onSubmit={sendDataRentCar} className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 space-y-4">
                         <label className="block text-gray-700 text-sm font-bold mb-2">
                             <span>Imię:</span>
-                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="name" />
+                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required type="text" name="name" />
                         </label>
                         <label className="block text-gray-700 text-sm font-bold mb-2">
                             <span>Nazwisko:</span>
-                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="lastname" />
+                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required type="text" name="lastname" />
                         </label>
                         <label className="block text-gray-700 text-sm font-bold mb-2">
                             <span>Email:</span>
-                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="email" name="email" />
+                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required type="email" name="email" />
                         </label>
                         <label className="block text-gray-700 text-sm font-bold mb-2">
                             <span>Miasto:</span>
-                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" type="text" name="city" />
+                            <input className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required type="text" name="city" />
                         </label>
                         <input className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline cursor-pointer" type="submit" value="Wyślij" />
                     </form>
                 </>}
             {error && <p className="bg-red-200 text-red-700 p-4 rounded-md text-center font-bold">{error}</p>}
             {success && <p className="bg-green-200 text-green-700 p-4 rounded-md text-center font-bold">{success}</p>}
+            <Footer />
         </div>
     )
 }
